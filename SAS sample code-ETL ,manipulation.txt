@@ -1,0 +1,656 @@
+/*program crated By: Mansi Shah
+  program created on: April 18th 2022
+  Program Created for : Final Exam Part A
+*/
+
+
+
+*set the file and library reference;
+x "cd L:\st555\Data\BookData\ClinicalTrialCaseStudy";
+libname InputDS ".";
+filename InputRaw ".";
+
+x "cd L:\st555\Results";
+libname Results ".";
+
+x "cd S:\st555_mansi";
+libname Exam ".";
+
+*set macro variables;
+%let vist_attrib =
+attrib subject label= "Subject"
+      sf_reason label="Screen Failure Reason"  length= $50.
+      screen    label="Screening Flag, 0=Failure, 1=Pass"
+      sex       label="Sex"
+      DOV       label="Date of Visit"                       format=mmddyy10.
+      notif_date                                            format= MMDDYY10.
+      sbp       label="Systolic Blood Pressure"
+      dbp       label="Diastolic Blood Pressure"
+      bpunit    label="BP Unit"
+      pulse     label="Pulse"
+      pulse_unit  label="Pulse Unit"
+      temp      label="Temprature"
+      temp_unit  label="Temperature Unit"
+      weight      label="Weight"
+      weightunit  label="Weight Unit"
+      pain        label="Pain"
+      start_trt  label= "Starting Treatment"    length = $10.
+      ;
+%let visit_input =
+input subject
+      sf_reason : $19.
+      screen
+      sex $
+      DOV : date9.
+      notif_date : date9.
+      sbp 
+      dbp
+      bpunit : $5.
+      pulse 
+      pulse_unit : $9.
+      Pos : $10.
+      temp  
+      temp_unit :$1.
+      weight 
+      weightunit : $2.
+      pain 
+      ;
+
+%let lab_attrib=
+attrib sujbect label= "Subject" 
+       DOV     label= "Date of Visit"                   format= MMDDYY10.
+       sf_reason label="Screen Failure Reason"
+       notif_date                                       format= MMDDYY10.
+       screen  label ="Screening Flag, 0=Failure, 1=Pass"
+       sex     label="Sex"
+       alb     label="Chem-Albumin, g/dL"
+       alk_phos label= "Chem-Alk. Phos., IU/L"
+       alt      label="Chem-Alt, IU/L"
+       ast      label="Chem-AST, IU/L"
+       c_gluc   label="Chem-Glicose, mg/dL"
+       d_bili   label="Chem-Dir, Bilirubin, mg/dL"
+       ggtp     label="Chem-GGTP, IU/L"
+       hematocr label= "EVF/PCV, %"
+       hemoglob label="Hemoglobin, g/dL"
+       preg     label="Pregnancy Flag, 1=Pregnant, 0=Not"
+       prot     label="Chem-Tot, Prot., g/dL"
+       t_bili   label="Chem-Tot. Bilirubin, mg/dL"
+       u_gluc   label= "Uri.-Glucose, 1=high"
+       ;
+
+%let lab_input =
+input subject
+     DOV : date9.
+     notif_date : date9.
+     sf_reason : $19.
+     screen
+     sex $
+     alb
+     alk_phos
+     alt
+     ast 
+     d_bili
+     ggtp
+     c_gluc
+     u_gluc
+     t_bili
+     prot
+     hemoglob
+     hematocr
+     preg
+;
+
+
+options fmtsearch = (exam Inputds);
+
+*read rawdata files for site 1 baseline visit data;
+data Exam.baseline;
+infile InputRaw("Site 1, Baseline Visit.txt") dlm="09"x dsd missover ;
+&vist_attrib;
+&visit_input;
+run;
+
+
+*Reading raw data file for site1 3 month visit data;
+data exam.v_3;
+infile InputRaw("Site 1, 3 Month Visit.txt") dsd dlm ="09"x;
+&vist_attrib;
+&visit_input;
+run;
+
+*Reading raw data file for 6 month visit data;
+data exam.v_6;
+infile InputRaw("Site 1, 6 Month Visit.txt") dsd dlm = "09"x ;
+&vist_attrib;
+&visit_input;
+run;
+
+*Reading raw data file for site1 9 month visit data;
+data exam.v_9;
+infile InputRaw("Site 1, 9 Month Visit.txt") dsd dlm = "09"x ;
+&vist_attrib;
+&visit_input;
+ 
+run;
+
+*Reading raw data file for site1 12 month visit data;
+data exam.v_12;
+infile InputRaw ("Site 1, 12 Month Visit.txt") dsd dlm = "09"x ;
+&vist_attrib;
+&visit_input;
+run;
+
+
+*Reading raw data file for baseline lab data;
+data exam.baseline_results;
+infile InputRaw("Site 1, Baseline Lab Results.txt") dlm ="09"x dsd missover;
+&lab_attrib;
+&lab_input;
+run;
+
+*Reading raw data file for 3 month visit lab data;
+data exam.l_3;
+infile InputRaw("Site 1, 3 Month Lab Results.txt") dlm ="09"x dsd missover;
+&lab_attrib;
+&lab_input;
+run;
+
+*Reading raw data file for 6 month visit lab data;
+data exam.l_6;
+infile InputRaw("Site 1, 6 Month Lab Results.txt") dlm ="09"x dsd missover;
+&lab_attrib;
+&lab_input;
+run;
+
+*Reading raw data file for 9 month visit lab data;
+data exam.l_9;
+infile InputRaw("Site 1, 9 Month Lab Results.txt") dlm ="09"x dsd missover;
+&lab_attrib;
+&lab_input;
+run;
+
+*Reading raw data file for 12 month visit lab data;
+data exam.l_12;
+infile InputRaw("Site 1, 12 Month Lab Results.txt") dlm ="09"x dsd missover;
+&lab_attrib;
+&lab_input;
+run;
+
+
+*creating format to add variable in visit data and lab data;
+proc format library = exam;
+value v_num 0 = "Baseline"
+             1 = "3 Month"
+             2 = "6 Month"
+             3 = "9 Month"
+             4 = "12 Month"
+             ;
+value v_month 0 = "Baseline"
+                  3 = "3 Month"
+                  6 = "6 Montht"
+                  9 = "9 Month"
+                  12 = "12 Month"
+;
+run;
+ 
+*Joining all visit data : performing vertical stacking, deriving 3 new variables as asked and performed clieaning;
+data exam.v_join (drop = start_trt);
+attrib visitNum length = 8.
+       visitMonth length=8.
+       ;
+set Exam.baseline(in= inA)
+    exam.v_3(in =inB)
+    exam.v_6 (in =inC)
+    exam.v_9 (in =inD)
+    exam.v_12 (in =inE)
+    ;
+if inA eq 1 then do;
+  visitNum= 0;
+  visitMonth =0;
+end;
+if inB eq 1 then do;
+  visitNum= 1;
+  visitMonth =3;
+end;
+if inC eq 1 then do;
+   visitNum= 2;
+  visitMonth =6;
+end;
+if inD eq 1 then do;
+   visitNum= 3;
+  visitMonth =9;
+end;
+if inE eq 1 then do;
+   visitNum= 4;
+  visitMonth =12;
+end;
+if sex = "F" then sex = "Female";
+if sex = "M" then sex = "Male";
+VisitC =put(visitNum, v_num.);
+if Pos eq ('sitting' or "Sitting" or "Reclined") then Pos = "RECLINED";
+if Pos eq ( "SEATED" or 'seated') then Pos = "RECUMBENT";
+run;
+
+*Joining all labdata , performing vertical stacking;
+data exam.lab_join;
+attrib visitNum length = 8.
+       visitMonth length=8.
+       ;
+set Exam.baseline_results(in= inA)
+    exam.l_3(in =inB)
+    exam.l_6 (in =inC)
+    exam.l_9 (in =inD)
+    exam.l_12 (in =inE)
+    ;
+if inA eq 1 then do;
+  visitNum= 0;
+  visitMonth =0;
+end;
+if inB eq 1 then do;
+  visitNum= 1;
+  visitMonth =3;
+end;
+if inC eq 1 then do;
+   visitNum= 2;
+  visitMonth =6;
+end;
+if inD eq 1 then do;
+   visitNum= 3;
+  visitMonth =9;
+end;
+if inE eq 1 then do;
+   visitNum= 4;
+  visitMonth =12;
+end;
+if sex = "F" then sex = "Female";
+if sex = "M" then sex = "Male";
+VisitC =put(visitNum, v_num.);
+run;
+
+*Following three steps in order to produce output8.5.6;
+* We will used combined visit data set , sort it ,transpose it and will add column of days to it;
+proc sort data=exam.v_join out=exam.visit_sort ;
+by subject;
+run;
+*producing data for all subjects with their visits dates where screen is 0;
+proc transpose data= exam.visit_sort
+                prefix= vis
+                out= exam.visit_A (drop=_NAME_ _LABEL_ );
+by subject;
+var DOV;
+where screen ne 0;
+run;
+*adding days as a column for required output;
+data exam.output8;
+set exam.visit_A;
+attrib days label="Days";
+if vis3 = . then do;
+  days =intck('day',vis1,vis2);
+end;
+else if vis4 = . then do;
+  days =intck('day', vis1, vis3);
+end;
+else if vis5 = . then do;
+  days= intck('day', vis1,vis4);
+end;
+else days = intck('day',vis1,vis5);
+run;
+* I have used https://documentation.sas.com/doc/en/vdmmlcdc/8.1/lefunctionsref/p1md4mx2crzfaqn14va8kt7qvfhr.htm for countding days function;
+
+
+
+*Follwing steps are to produce output 8.5.8;
+*first we will get metadata of lab data set;
+*We will sort data set by name in order to merge with labinfo data set from book;
+proc contents data= exam.baseline_results 
+              out=exam.lab_metadata(keep=NAME LABEL) varnum;
+run;
+proc sort data= exam.lab_metadata out=exam.sorted_labmetadata ;
+by name;
+run;
+
+*We will change value of lab info data set from book in preparation for merge on same value;
+data exam.labinfo_namechange(rename=(lbtestcd=name));
+set inputds.lab_info;
+if lbtestcd = 'ALB' then lbtestcd= 'alb';
+if lbtestcd = 'ALP' then lbtestcd= "alk_phos";
+if lbtestcd = 'ALT' then lbtestcd= 'alt';
+if lbtestcd = 'AST' then lbtestcd= 'ast';
+if lbtestcd = 'GLUC' and colunits = "mg/dL" then lbtestcd= 'c_gluc';
+if lbtestcd = 'GLUC' then lbtestcd= 'u_gluc';
+if lbtestcd = 'BILDIR' then lbtestcd= 'd_bili';
+if lbtestcd = 'GGT' then lbtestcd= 'ggtp';
+if lbtestcd = 'HCT' then lbtestcd= 'hematocr';
+if lbtestcd = 'HGB' then lbtestcd= 'hemoglob';
+if lbtestcd = 'BILI' then lbtestcd= 't_bili';
+if lbtestcd = 'PROT' then lbtestcd= 'prot';
+if lbtestcd = 'PREG' then lbtestcd ="preg";
+run;
+
+*we need to sort the data by name before merging;
+proc sort data=exam.labinfo_namechange out=exam.sorted_labinfo;
+by name;
+run;
+
+*merge lab meta data with lab info data and sort it in prepration for further merge;
+data exam.lab_merge;
+attrib Label  length= $40.;
+merge exam.sorted_labmetadata 
+      exam.sorted_labinfo ;
+by name;
+run;
+
+proc sort data=exam.lab_merge out= exam.lab_merge_sort;
+by label;
+run;
+
+*Transpose baseline lab data and sort it to be prepared to merge with baseline lab data ;
+proc transpose data= exam.baseline_results out=exam.baseline_result_transpose(rename =(col1 =Value _LABEL_ =label _NAME_=name));
+by subject;
+var alb--u_gluc;
+run;
+*we need to sort by label in preparation for merge;
+proc sort data=exam.baseline_result_transpose out= exam.baseline_lab_sort;
+by label;
+run;
+
+*for output 8.5.8 , we used baseline lab transposed data and (combined infodata -metadata for lab);
+data exam.baselinelabresults_output8 (keep=subject labtest Value colunits lownorm highnorm RangeFlag);
+attrib subject label= "Subjcet"
+      labtest    label= "Laboratory Test"
+      colunits label="Collected Units"
+      Value   label= "Value"
+      lownorm label= "Normal Range Lower Limit"
+      highnorm label ="Normal Range Upper Limit"
+      RangeFlag   label="RangeFlag"                                length= 8.
+      ;
+merge exam.baseline_lab_sort (in =inA)
+      exam.lab_merge_sort(in=inB) ;
+by label;
+if inA eq 1 and inB eq 1 then do;
+  if Value > highnorm or Value < lownorm then RangeFlag = 1;
+  else RangeFlag =0;
+  output;
+end;
+if inA eq 1 then output;
+run;
+
+*To create output 8.6.1;
+data exam.array_baseline(drop= i Temperature Weight SystolicBP DiastolicBP sbp dbp bpunit pulse pulse_unit temp temp_unit weightunit);
+set exam.baseline(drop=VisitC sf_reason screen sex notif_date Pos pain) ;
+attrib name length=$20.;
+array _name[5]  $ SystolicBP DiastolicBP Pulse Temperature Weight;
+array _value[5] sbp dbp pulse temp weight;
+array _unit[5] $ bpunit bpunit pulse_unit temp_unit weightunit;
+do i = 1 to 5;
+  value = _value[i];
+  unit = _unit[i];
+  name= vname(_name(i));
+  output;
+end;
+format DOV mmddyy10.;
+run;
+
+*to create output for 8.6.2;
+data  exam.array_visit(drop= i Temperature Weight SystolicBP DiastolicBP sbp dbp bpunit pulse pulse_unit temp temp_unit weightunit visitNum visitMonth  sf_reason screen sex notif_date Pos Pain);
+attrib name length=$20.;
+set exam.v_join;
+array _name[5]  $ SystolicBP DiastolicBP Pulse Temperature Weight;
+array _value[5] sbp dbp pulse temp weight;
+array _unit[5] $ bpunit bpunit pulse_unit temp_unit weightunit;
+do i = 1 to 5;
+  value = _value[i];
+  unit = _unit[i];
+  name= vname(_name(i));
+  output;
+  
+end;
+format DOV mmddyy10.;
+run;
+
+*******************************;
+*producing output;
+
+*This data reading is not working, but I try to attempt to read with loop and line pointer control;
+data exam.adv;
+infile RawDAta("Site 1 Adverse Events.txt") dsd dlm ="09"x truncover ;
+input indicator : $1. subject   @;
+input indicator : $1. a : date9. b : date9. @;
+ do whilel = (indicator = "d"); 
+  input indicator : $1. c $ @;
+  output;
+  input indicator :$1. d e f g h @;
+  output;
+  input indicator :$1. i $ j $ k $ l $ m $ @;
+  output;
+  input indicator : $1. n o p $ q r @;
+  output;
+ input indicator : $1. @ ;
+end;
+run;
+
+
+
+*we need to make format for this output;
+proc format library=exam;
+value sbp (fuzz=0) low -< 120 = 'Acceptable'
+                   120 - high = 'High'
+                   ;
+value visit_month(fuzz=0) '01JAN2018'd - '31Jan2018'd = "Jan2018"
+                          '01FEB2018'd - '28FEB2018'd = "Feb2018"
+                          '01MAR2018'd - '31MAR2018'd = "Mar2018"
+                          '01APR2018'd - '30APR2018'd = "Apr2018"
+                          ;
+value cvcolor(fuzz=0)  1 = '#FFFFFF'
+                       2 = '#cococo'
+                       ;
+run;
+
+*select destination for output;
+options nodate pageno=1;
+ods noproctitle;
+ods listing close;
+ods pdf file ="Shah Final Report Site 1.pdf"
+        style =Meadow;
+
+ods rtf file ="Shah Final Report Site 1.rtf"
+        style =Sapphire;
+
+ods powerpoint file = "Shah Final Reprot Site 1.pptx"
+                style =PowerpointDark;
+
+ods pdf exclude none;
+ods rtf exclude none;
+ods powerpoint exclude all;
+
+*output 8.2.3: used visit merge file, this is table : rtf;
+title "Output 8.2.3. Sex Versus Pain Level Split on Screen Failure Versus Pass, Site 1 Baseline";
+proc freq data=exam.v_join;
+table screen*sex*pain /nocol nopercent norow;
+where visitNum= 0;
+run;
+title ;
+
+ods powerpoint exclude none;
+*output 8.2.4: used visit merge file, this is table : pwoerpoint;
+title "Output 8.2.4: Sex Versus Screen Failure at Baseline Visit in Site 1";
+proc freq data= exam.v_join;
+table sex*sf_reason /nocol nopercent  ;
+where visitNum =0 and screen=0;
+run;
+title;
+
+
+*output 8.2.5: used lab merge file, this is table: powerpoint, mkae sure format does not go anywhere;
+title "Output 8.2.5: Diastolic Blood pressure and Pulse Summary Statistics at Baseline Visit in Site 1";
+proc means data=  exam.v_join maxdec =1;
+class sex sbp;
+var dbp pulse;
+format sbp sbp.;
+where visitNum=0;
+run;
+title;
+
+ods powerpoint exclude all;
+
+*output 8.2.6: used lab merg file, this is table: rtf;
+title "Output 8.2.6:Glucose and Hemoglobin Summary Statistics from Baseline Lab Results, Site 1";
+proc means data = exam.lab_join n min q1 median q3 max nolabels maxdec =1;
+var c_gluc hemoglob;
+class sex;
+where visitNum =0;
+run;
+title;
+
+
+ods rtf exclude all;
+ods listing image_dpi = 300;
+ods graphics / reset width =6in ;
+
+*output 8.3.2: Recruits that Pass Initial Screening, By Month in Site 1;
+*this is graph, need png save, will go in pdf;
+* use visit_join ;
+ods output sgplot =exam.output8_3_2;
+title "Output 8.3.2: Recruits that Pass Initial Screening, By Month in Site 1";
+proc sgplot data= exam.v_join;
+vbar dov /group =sex 
+                groupdisplay =cluster 
+                response= subject
+                stat = freq;
+format dov visit_month.;
+where visitNum=0 and screen=1;
+xaxis label ="Month";
+yaxis label ="Passed Screening at Baseline Visit";
+keylegend /location= inside position=topleft across=0;
+run;
+title;
+
+ods output sgplot =exam.output8_3_3;
+*Output 8.3.3, graph, pdf and png name, use baseline reasulsts/ lab merge data;
+title "Output 8.3.3:Average Albumin Results-Baseline lab, Site 1";
+proc sgplot data =exam.lab_join;
+hbar sex / response= alb
+          stat = mean
+          limits= upper
+          alpha= 0.05
+          ;
+yaxis display =(nolabel);
+run;
+title;
+
+ods output sgpanel =exam.output8_4_3;
+*output 8.4.3, graph, will go in pdf and png name, graph produces by using lab and visit info;
+title "Output 8.4.3:Glucose Distribution, Baseline and 3 Month Visits, Site 1";
+proc sgpanel data=exam.lab_join;
+panelby VisitC /novarname ;
+histogram c_gluc /  scale = percent;
+rowaxis label ="Percent" ;
+where visitNum =0 or visitNum=1;
+run;
+title;
+
+ods pdf exclude all;
+
+*output 8.4.4, graph by prof, pdf and png name, can use join visit  : need all visit info and bp;
+*In order to produce output, one need quartile range first;
+proc means data=exam.v_join noobs p25 median p75 maxdec =0;
+class VisitC;
+var sbp;
+ods output summary =exam.quartiles;
+run;
+
+ods pdf exclude none;
+ods output sgplot= exam.output8_4_4;
+title "Output 8.4.4: Systolic Blood Pressure Quartiles, Site 1";
+proc sgplot data = exam.quartiles;
+highlow x= VisitC low=sbp_p25 high =sbp_p75 /type=bar barwidth=0.3;
+yaxis label="Systolic BP--Q1 to Q3 Span";
+xaxis label ="Visit";
+run;
+title;
+
+ods rtf exclude none;
+*output 8.5.6, will go in pdf and rtf;
+title "Output 8.5.6: Visits for All Subjects with Days on Study, Site 1(Partial Listing)";
+proc print data =exam.output8  (obs=11) noobs;
+run;
+title;
+
+*output 8.5.8, will go in pdf and rtf;
+title "Output 8.5.8: Baseline Lab Results for Subject 99, sit 1-including Flag for Values Outisde Normal Range";
+proc print data=exam.baselinelabresults_output8 noobs label;
+where subject =99;
+run;
+title;
+
+*output go in pdf rtf;
+title "Output 8.6.1: Rotated Data From Baseline Visit,Site1(Partial Listing)";
+proc print data=exam.array_visit (obs=10) noobs label;
+where VisitC = "Baseline";
+run;
+title;
+
+*output go in rtf pdf;
+title "Output 8.6.2:Summary Reprot on Selected Vital Signs, All Visits, Site 1";
+proc report data=exam.array_visit nowd;
+where name in("DiastolicBP","pulse","SystolicBP", "Temperature");
+column VisitC name unit value value=mymedian value=mystd value=mymin value=mymax;
+define VisitC/group descending;
+define name/group "Measurment" ;
+define unit/group;
+define value/ analysis mean "Mean" format=5.1;
+define mymedian/analysis median "Median" format= 5.1;
+define mystd/ analysis std "STD. Deviation" format = 5.2;
+define mymin /analysis min "Minimum" format =3.1;
+define mymax/analysis max "Maximum" format =5.1;
+run;
+title;
+
+ods powerpoint exclude none;
+*output go in rtf and pdf and powerpoint;
+title "Output 8.6.3:BP Summaries, All Visits, Site 1";
+proc report data= exam.array_visit nowd;
+where name in ('DiastolicBP' , 'SystolicBP');
+column VisitC name , value,(mean median std)  ;
+define VisitC /group descending;
+define name / across 'Measurement';
+define value/analysis   format= 5.1;
+define mymedian/analysis   ;
+define mystd/analysis   ;
+run;
+title;
+
+
+*output 8.7.1 pdf listing;
+
+
+ods powerpoint exclude all;
+
+*output 8.7.3 table rtf, used same file as 8.6.2;
+title "Output 8.7.3:Summary Reprot on Selected Vital Signs,All Visits, Site1-Enhanced";
+proc report data=exam.array_visit nowd
+style (header) =[fontweight = bold];
+*style (lines) = [color=black];
+where name in("DiastolicBP","pulse","SystolicBP", "Temperature");
+column VisitC name unit value value=mymedian value=mystd value=mymin value=mymax ;
+define VisitC/group descending style =[fontsize =18pt fontweight=bold];
+define name/group "Measurment" ;
+define unit/group;
+define value/ analysis mean "Mean" format=5.1;
+define mymedian/analysis median "Median" format= 5.1;
+define mystd/ analysis std "STD. Deviation" format = 5.2;
+define mymin /analysis min "Minimum" format =3.1;
+define mymax/analysis max "Maximum" format =5.1;
+define line /group noprint;
+*compute after VisitC/style =[backgroundcolor =black];
+  *line ' ';
+ * if VisitC = "DiastolicBP" or "Temperature" then call define(_row_, 'style', 'style=[backgroundcolor= white]');
+ * if VisitC = "Pulse" or "SystolicBP" then call define(_row_, 'style', 'style=[backgroundcolor=gray99]');
+*endcomp;
+run;
+title;
+
+ods pdf close;
+ods rtf close;
+ods powerpoint close;
+quit;
